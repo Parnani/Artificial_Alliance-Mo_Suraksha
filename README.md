@@ -49,5 +49,3 @@ streamlit run app.py
 - Needed to press C and clear streamlit cache in case some weird bugs comes up
 
 # Feel free to star this repo if you loved it
-
-## Credits: 
