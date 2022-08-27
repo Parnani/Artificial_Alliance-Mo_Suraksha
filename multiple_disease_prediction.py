@@ -6,7 +6,18 @@ import py_files.diabetes as diabetes
 import py_files.heart as heart
 import py_files.liver as liver
 import hashlib
+import streamlit.components.v1 as components
 
+def home_page():
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image('logo.png')
+    st.title('Welcome to Mo Suraksha')
+    st.subheader('Minds that cure, hearts that care')
+    "Now you can predict the disease you are suffering from with just a few clicks."
+    "We have three models to predict the disease you are suffering from."
+    "You can choose the disease you want to predict from the sidebar."
+    st.subheader('Make a choice on the sidebar to get started.')
 
 # DB Management
 import sqlite3
@@ -174,7 +185,6 @@ def login_ui():
                         st.session_state.create = 3
                         st.warning('Username already exists')
 
-
 # loading the saved models
 diabetes_model = pickle.load(open('./saved-models/diabetes.sav', 'rb'))
 
@@ -186,7 +196,6 @@ liver_disease_model = pickle.load(open('./saved-models/liver.sav', 'rb'))
 with st.sidebar:
     
     selected = option_menu('Mo Suraksha',
-
                           ['Home', 
                            'Diabetes Prediction',
                            'Heart Disease Prediction',
@@ -194,6 +203,9 @@ with st.sidebar:
                            'View Stored Data'],
                           icons=['house-door','activity','heart','person','cloud-arrow-down'],
                           default_index=0,menu_icon='clipboard-data')
+
+if selected == 'Home':
+    home_page()
 
 if selected == 'View Stored Data':
     login_ui()
