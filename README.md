@@ -1,35 +1,53 @@
+
 # Team - Artificial Alliance
 # Mo Suraksha
 
-- added 3 .ipynb files for diabetes, heart disease and liver disease.
-    - diabetes.ipynb -
-        - imported all the required libraries.
-        - created a pandas dataframe with diabetes.csv file.
-        - performed a train_test_split() on the data.
-        - implemented Support Vector Machine algorithm with kernel as linear and fitted the training data in it.
-        - made the predictions and generated the accuracy score of the model.
-        - saved the model using pickle library of python which converts the model into binary stream.
-        - implemented the prediction on a random data and checked if he/she is diabetic.
-    - heart.ipynb -
-        - created a pandas dataframe with heart.csv file.
-        - implemented LogisticRegression() algorithm.
-    - liver.ipynb -
-        - created a pandas dataframe with liver.csv file.
-        - mapped the string value of gender to (0,1) for ('Female','Male') respectively.
-        - replaced the NaN values in df_liver['Albumin_and_Globulin_Ratio'] column with 0.
-        - implemented LogisticRegression() algorithm.
+## Minds that cure, hearts that care
 
-- exported the .ipynb files into .py files.
+Now you can predict the disease you are suffering from with just a few clicks.
 
-- multiple_disease_prediction.py -
-    - loaded the saved models using pickle.
-    - implemented user database
-        - created a table for user details and entries for individual data and stored them to data.db
-        - implemented login system to website
-        - added an option to print the table
-        - added session-based sign up system
-        - upon login, users can now view all stored datas 
-    - implemented database access page
-    - implemented sidebar containg Home, Diabetes Prediction, Heart Disease Prediction, Liver Disease Prediction, View Stored Data.
-    - implemented sliders for each of the features in all 3 diseases.
-    - added diseases' dataframes, description of the dataframe and a bar-chart visualization of the data.
+We have three models to predict the disease you are suffering from.
+
+You can choose the disease you want to predict from the sidebar.
+
+## Setting up 
+
+Make sure you have python installed in your machine. To clone the project, enter this command: 
+
+```bash
+pip install streamlit pickle pandas streamlit_option_menu hashlib sqlite3
+```
+
+Now clone this github repo by this command. Make sure you have git installed. 
+
+```bash
+cd <path-to-save-directory>
+git clone https://github.com/Parnani/Artificial_Alliance-Mo_Suraksha.git
+```
+
+To run the web app locally in your machine, run this command
+
+```bash
+cd <path-to-folder>
+streamlit run app.py
+```
+
+## Usage
+
+- Navigate the app using sidebar between the menues. 
+- Modify the sliders of the fields as per the test result data. 
+- To save data, you will first need to sign up to the account. To create a new account: 
+    - Navigate to 'View Stored Data'
+    - You will be asked to sign up there. Make sure you remember/save password
+    - Use same credentials to save all test data. 
+- To view saved data, simply goto 'View Stored Data'. Then enter user details and check 'login' box. 
+
+## Known issues 
+- Implementation of signup/login button everywhere
+- Slower initial load time (time will be consumed in training ML datas)
+- Laggy graph
+- Needed to press C and clear streamlit cache in case some weird bugs comes up
+
+# Feel free to star this repo if you loved it
+
+## Credits: 
