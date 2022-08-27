@@ -1,10 +1,6 @@
 import pickle
-import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
-import py_files.diabetes as diabetes
-import py_files.heart as heart
-import py_files.liver as liver
 
 # loading the saved models
 diabetes_model = pickle.load(open('saved-models/diabetes.sav', 'rb'))
@@ -17,7 +13,7 @@ liver_disease_model = pickle.load(open('saved-models/liver.sav', 'rb'))
 with st.sidebar:
     
     selected = option_menu('Mo Suraksha',
-
+                          
                           ['Diabetes Prediction',
                            'Heart Disease Prediction',
                            'Liver Disease Prediction'],
@@ -28,7 +24,7 @@ with st.sidebar:
 if (selected == 'Diabetes Prediction'):
     
     # page title
-    st.title('Diabetes Prediction')
+    st.title('Diabetes Prediction using ML')
     
     
     # getting the input data from the user
@@ -65,7 +61,7 @@ if (selected == 'Diabetes Prediction'):
     
     if st.button('Diabetes Test Result'):
         diab_prediction = diabetes_model.predict([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
-        
+        diab_prediction
         if (diab_prediction[0] == 1):
           diab_diagnosis = 'The person is diabetic'
         else:
@@ -73,18 +69,12 @@ if (selected == 'Diabetes Prediction'):
         
     st.success(diab_diagnosis)
 
-    df_diabetes = pd.read_csv('datasets\diabetes.csv')
-    st.subheader('Data Information: ')
-    st.dataframe(df_diabetes)
-    st.write(df_diabetes.describe())
-    st.bar_chart(df_diabetes)
-    st.write('### Model Accuracy - ',diabetes.accuracy)
 
 # Heart Disease Prediction Page
 if (selected == 'Heart Disease Prediction'):
     
     # page title
-    st.title('Heart Disease Prediction')
+    st.title('Heart Disease Prediction using ML')
     
     col1, col2, col3 = st.columns(3)
     
@@ -92,7 +82,7 @@ if (selected == 'Heart Disease Prediction'):
         age = st.slider('Age',10,100,40)
         
     with col2:
-        sex = st.selectbox('Sex: 1-Male,0-Female',('1','0'))
+        sex = st.selectbox('Gender',('Male','Female'))
         
     with col3:
         cp = st.slider('Chest Pain types',0.0,3.0,2.0)
@@ -104,7 +94,7 @@ if (selected == 'Heart Disease Prediction'):
         chol = st.slider('Serum Cholestoral in mg/dl',150.0,350.0,170.0)
         
     with col3:
-        fbs = st.selectbox('Fasting Blood Sugar: 1-Yes,0-No',('1','0'))
+        fbs = st.slider('Fasting Blood Sugar > 120 mg/dl',0,1)
         
     with col1:
         restecg = st.selectbox('Resting Electrocardiographic results',('1','0'))
@@ -125,7 +115,7 @@ if (selected == 'Heart Disease Prediction'):
         ca = st.slider('Major vessels colored by flourosopy',0,2,1)
         
     with col1:
-        thal = st.selectbox('thal: 1 = normal; 2 = fixed defect; 3 = reversable defect',('1','2','3'))
+        thal = st.selectbox('thal: 0 = normal; 1 = fixed defect; 2 = reversable defect',('1','2'))
         
     # code for Prediction
     heart_diagnosis = ''
@@ -133,7 +123,8 @@ if (selected == 'Heart Disease Prediction'):
     # creating a button for Prediction
     
     if st.button('Heart Disease Test Result'):
-        heart_prediction = heart_disease_model.predict([[int(age), int(sex), int(cp), int(trestbps), int(chol), int(fbs), int(restecg),int(thalach),int(exang),int(oldpeak),int(slope),int(ca),int(thal)]])                          
+        heart_prediction = heart_disease_model.predict([[int(age), int(sex), int(cp), int(trestbps), int(chol), int(fbs), int(restecg),int(thalach),int(exang),int(oldpeak),int(slope),int(ca),int(thal)]])  
+        heart_prediction                        
         
         if (heart_prediction[0] == 1):
           heart_diagnosis = 'The person is having heart disease'
@@ -142,19 +133,12 @@ if (selected == 'Heart Disease Prediction'):
         
     st.success(heart_diagnosis)
 
-    df_heart = pd.read_csv('datasets\heart.csv')
-    st.subheader('Data Information: ')
-    st.dataframe(df_heart,width=700)
-    st.write(df_heart.describe())
-    st.bar_chart(df_heart)
-    st.write('### Model Accuracy - ',heart.accuracy)
-
 
 # Liver Disease Prediction Page
 if (selected == 'Liver Disease Prediction'):
     
     # page title
-    st.title('Liver Disease Prediction')
+    st.title('Liver Disease Prediction using ML')
     
     col1, col2, col3 = st.columns(3)
     
@@ -204,12 +188,3 @@ if (selected == 'Liver Disease Prediction'):
           liver_diagnosis = 'The person does not have any liver disease'
         
     st.success(liver_diagnosis)
-
-    df_liver = pd.read_csv('datasets\liver.csv')
-    gender = {'Male': 1,'Female': 0}
-    df_liver['Gender'] = [gender[item] for item in df_liver['Gender']]
-    st.subheader('Data Information: ')
-    st.dataframe(df_liver,width=700)
-    st.write(df_liver.describe())
-    st.bar_chart(df_liver)
-    st.write('### Model Accuracy - ',liver.accuracy)
