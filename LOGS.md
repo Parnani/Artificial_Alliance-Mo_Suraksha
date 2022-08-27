@@ -26,3 +26,5 @@
     - created a table for user details and entries for individual data and stored them to data.db
     - implemented login system to website
     - added an option to print the table
+    - added session-based sign up system
+    - upon login, users can now view all stored datas
