@@ -49,3 +49,11 @@ streamlit run app.py
 - Needed to press C and clear streamlit cache in case some weird bugs comes up
 
 # Feel free to star this repo if you loved it
+
+## Credits
+
+GitHub / **[Parnani](https://github.com/Parnani/)** 
+
+Github / **[TechyAditya](https://github.com/TechyAditya)** 
+
+GitHub / **[sushovanb02](https://github.com/sushovanb02)** 
