@@ -1,6 +1,7 @@
 import hashlib
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 
 # DB Management
 import sqlite3
@@ -46,8 +47,9 @@ def liver_view(username):
     data = c.fetchall()
     return data
 
+
 def liver_ins(username, Age, Gender, Total_Bilirubin, Direct_Bilirubin, Alkaline_Phosphotase, Alamine_Aminotransferase, Aspartate_Aminotransferase, Total_Protiens, Albumin, Albumin_and_Globulin_Ratio, Dataset):
-    sex = {'Male': 1,'Female': 0}
+    sex = {'Male': 1, 'Female': 0}
     gender = sex[Gender]
     c.execute('INSERT INTO liver VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', (username, Age, gender, Total_Bilirubin, Direct_Bilirubin,
               Alkaline_Phosphotase, Alamine_Aminotransferase, Aspartate_Aminotransferase, Total_Protiens, Albumin, Albumin_and_Globulin_Ratio, Dataset))
@@ -78,6 +80,12 @@ def diabetes_view(username):
     return data
 
 
+def liver_cleanup(data):
+    sex = {1: 'Male', 0: 'Female'}
+    data[2] = sex[data[2]]
+    return data
+
+
 def login_ui():
     st.title('View your stored data here')
     username = st.sidebar.text_input("User Name")
@@ -90,10 +98,34 @@ def login_ui():
         if result:
             check_hashes('password', hashed_pswd)
             st.success('Login Successful')
-            choice = st.radio("Select Dataset to Display", ("Liver", "Heart", "Diabetes"))
+            choice = st.radio("Select Dataset to Display",
+                              ("Liver", "Heart", "Diabetes"))
             if choice == "Liver":
-                data = liver_view(username)
+                raw = list(liver_view(username))
+                st.write(raw)
+                data = pd.DataFrame(raw, columns=['Username', 'Age', 'Gender', 'Total Bilirubin', 'Direct Bilirubin', 'Alkaline Phosphotase',
+                                    'Alamine Aminotransferase', 'Aspartate Aminotransferase', 'Total Protiens', 'Albumin', 'Albumin and Globulin Ratio', 'Prediction'])
+                data.drop(columns=['Username'], inplace=True)
+
+                gender = {1: 'Male', 0: 'Female'}
+                data['Gender'] = [gender[item] for item in data['Gender']]
+                predict = {0: 'No', 1: 'Yes'}
+                data['Prediction'] = [predict[item]
+                                      for item in data['Prediction']]
                 st.write(data)
+
+                with st.container():
+                    key = st.number_input(
+                        'Enter the serial number of data', value=-1, min_value=-1, max_value=len(data)-1)
+                    delete = st.button('Delete')
+                    modify = st.button('Modify')
+                    if delete:
+                        if key != -1 and key < len(raw):
+                            c.execute(
+                                f'DELETE FROM liver WHERE ROWID = {key+1}')
+                            conn.commit()
+                            st.success('Data Deleted')
+
             if choice == "Heart":
                 data = heart_view(username)
                 st.write(data)
@@ -102,7 +134,38 @@ def login_ui():
                 st.write(data)
         else:
             st.warning('Incorrect Username/Password')
+    else:
+        st.subheader("New User?")
+        if 'create' not in st.session_state:
+            st.session_state.create = 0 
+        
+        if st.session_state.create == 2:
+            st.session_state.create = 0
+            st.success('Account Created')
+        if st.session_state.create == 3:
+            st.session_state.create = 0
+            st.warning('Username already exists')
             
+        acc = st.button("Create Account", key='acc')
+        if acc:
+            st.session_state.create = 1
+        if st.session_state.create == 1:
+            with st.form("Create a new account"):
+                new_username = st.text_input("User Name", key='username')
+                new_password = st.text_input("Password", type='password', key='password')
+                created = st.form_submit_button("Create Account")
+                if (created):
+                    c.execute(f'SELECT * FROM users WHERE username = "{new_username}"')
+                    data = c.fetchall()
+                    if (len(data) == 0):
+                        st.session_state.create = 2
+                        add_userdata(new_username, make_hashes(new_password))
+                        st.success('Account Created')
+                    else:
+                        st.session_state.create = 3
+                        st.warning('Username already exists')
+            
+                    
 
 
 if __name__ == '__main__':
