@@ -29,6 +29,7 @@
         - added an option to print the table
         - added session-based sign up system
         - upon login, users can now view all stored datas 
+        - implemented database save system 
     - implemented database access page
     - implemented sidebar containg Home, Diabetes Prediction, Heart Disease Prediction, Liver Disease Prediction, View Stored Data.
     - implemented sliders for each of the features in all 3 diseases.
