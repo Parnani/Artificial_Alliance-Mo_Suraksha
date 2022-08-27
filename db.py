@@ -97,12 +97,11 @@ def login_ui():
         result = login_user(username, check_hashes(password, hashed_pswd))
         if result:
             check_hashes('password', hashed_pswd)
-            st.success('Login Successful')
+            st.success(f'Welcome back {username}')
             choice = st.radio("Select Dataset to Display",
                               ("Liver", "Heart", "Diabetes"))
             if choice == "Liver":
                 raw = list(liver_view(username))
-                st.write(raw)
                 data = pd.DataFrame(raw, columns=['Username', 'Age', 'Gender', 'Total Bilirubin', 'Direct Bilirubin', 'Alkaline Phosphotase',
                                     'Alamine Aminotransferase', 'Aspartate Aminotransferase', 'Total Protiens', 'Albumin', 'Albumin and Globulin Ratio', 'Prediction'])
                 data.drop(columns=['Username'], inplace=True)
@@ -114,48 +113,53 @@ def login_ui():
                                       for item in data['Prediction']]
                 st.write(data)
 
-                with st.container():
-                    key = st.number_input(
-                        'Enter the serial number of data', value=-1, min_value=-1, max_value=len(data)-1)
-                    delete = st.button('Delete')
-                    modify = st.button('Modify')
-                    if delete:
-                        if key != -1 and key < len(raw):
-                            c.execute(
-                                f'DELETE FROM liver WHERE ROWID = {key+1}')
-                            conn.commit()
-                            st.success('Data Deleted')
-
             if choice == "Heart":
-                data = heart_view(username)
+                raw = heart_view(username)
+                
+                data = pd.DataFrame(raw, columns=['Username','Age','Sex','Chest Pain','BP','Cholestrol','Blood Sugar','ECG','Heart Rate','Angina','ST Depression','Slope of ST segment','Flourosopy','Haemoglobin','Prediction'])
+                predict = {0: 'No', 1: 'Yes'}
+                data.drop(columns=['Username'], inplace=True)
+                
+                data['Prediction'] = [predict[item]
+                                      for item in data['Prediction']]
+                gender = {1: 'Male', 0: 'Female'}
+                data['Sex'] = [gender[item] for item in data['Sex']]
                 st.write(data)
             if choice == "Diabetes":
-                data = diabetes_view(username)
+                raw = diabetes_view(username)
+                
+                data = pd.DataFrame(raw,columns=['Username','Pregnancies','Glucose','Blood Pressure','Skin Thickness','Insulin','BMI','Diabetes Pedigree Function','Age','Prediction'])
+                data.drop(columns=['Username'], inplace=True)
+                predict = {0: 'No', 1: 'Yes'}
+                data['Prediction'] = [predict[item]
+                                      for item in data['Prediction']]
                 st.write(data)
         else:
             st.warning('Incorrect Username/Password')
     else:
         st.subheader("New User?")
         if 'create' not in st.session_state:
-            st.session_state.create = 0 
-        
+            st.session_state.create = 0
+
         if st.session_state.create == 2:
             st.session_state.create = 0
             st.success('Account Created')
         if st.session_state.create == 3:
             st.session_state.create = 0
             st.warning('Username already exists')
-            
+
         acc = st.button("Create Account", key='acc')
         if acc:
             st.session_state.create = 1
         if st.session_state.create == 1:
             with st.form("Create a new account"):
                 new_username = st.text_input("User Name", key='username')
-                new_password = st.text_input("Password", type='password', key='password')
+                new_password = st.text_input(
+                    "Password", type='password', key='password')
                 created = st.form_submit_button("Create Account")
                 if (created):
-                    c.execute(f'SELECT * FROM users WHERE username = "{new_username}"')
+                    c.execute(
+                        f'SELECT * FROM users WHERE username = "{new_username}"')
                     data = c.fetchall()
                     if (len(data) == 0):
                         st.session_state.create = 2
@@ -164,8 +168,6 @@ def login_ui():
                     else:
                         st.session_state.create = 3
                         st.warning('Username already exists')
-            
-                    
 
 
 if __name__ == '__main__':
