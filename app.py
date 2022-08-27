@@ -6,7 +6,6 @@ import py_files.diabetes as diabetes
 import py_files.heart as heart
 import py_files.liver as liver
 import hashlib
-import streamlit.components.v1 as components
 
 def home_page():
     col1, col2, col3 = st.columns(3)
@@ -18,6 +17,11 @@ def home_page():
     "We have three models to predict the disease you are suffering from."
     "You can choose the disease you want to predict from the sidebar."
     st.subheader('Make a choice on the sidebar to get started.')
+
+# Delete all the items in Session state
+def clrcache():
+    for key in st.session_state.keys():
+        del st.session_state[key]
 
 # DB Management
 import sqlite3
@@ -37,7 +41,6 @@ def check_hashes(password, hashed_text):
 
 def create_usertable():
     c.execute('CREATE TABLE IF NOT EXISTS users(username TEXT,password TEXT)')
-
 
 def add_userdata(username, password):
     c.execute('INSERT INTO users(username,password) VALUES (?,?)',
@@ -65,9 +68,7 @@ def liver_view(username):
 
 
 def liver_ins(username, Age, Gender, Total_Bilirubin, Direct_Bilirubin, Alkaline_Phosphotase, Alamine_Aminotransferase, Aspartate_Aminotransferase, Total_Protiens, Albumin, Albumin_and_Globulin_Ratio, Dataset):
-    sex = {'Male': 1, 'Female': 0}
-    gender = sex[Gender]
-    c.execute('INSERT INTO liver VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', (username, Age, gender, Total_Bilirubin, Direct_Bilirubin,
+    c.execute('INSERT INTO liver VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', (username, Age, Gender, Total_Bilirubin, Direct_Bilirubin,
               Alkaline_Phosphotase, Alamine_Aminotransferase, Aspartate_Aminotransferase, Total_Protiens, Albumin, Albumin_and_Globulin_Ratio, Dataset))
     conn.commit()
 
@@ -107,7 +108,6 @@ def login_ui():
     username = st.sidebar.text_input("User Name")
     password = st.sidebar.text_input("Password", type='password')
     if st.sidebar.checkbox("Login"):
-        create_usertable()
         hashed_pswd = make_hashes(password)
 
         result = login_user(username, check_hashes(password, hashed_pswd))
@@ -124,9 +124,9 @@ def login_ui():
 
                 gender = {1: 'Male', 0: 'Female'}
                 data['Gender'] = [gender[item] for item in data['Gender']]
-                predict = {0: 'No', 1: 'Yes'}
+                predict = {0: 'NA', 1: 'Yes', 2: 'No'}
                 data['Prediction'] = [predict[item]
-                                      for item in data['Prediction']]
+                    for item in data['Prediction']]
                 st.write(data)
 
             if choice == "Heart":
@@ -154,20 +154,20 @@ def login_ui():
             st.warning('Incorrect Username/Password')
     else:
         st.subheader("New User?")
-        if 'create' not in st.session_state:
-            st.session_state.create = 0
+        if 'createuser' not in st.session_state:
+            st.session_state.createuser = 0
 
-        if st.session_state.create == 2:
-            st.session_state.create = 0
+        if st.session_state.createuser == 2:
+            st.session_state.createuser = 0
             st.success('Account Created')
-        if st.session_state.create == 3:
-            st.session_state.create = 0
+        if st.session_state.createuser == 3:
+            st.session_state.createuser = 0
             st.warning('Username already exists')
 
         acc = st.button("Create Account", key='acc')
         if acc:
-            st.session_state.create = 1
-        if st.session_state.create == 1:
+            st.session_state.createuser = 1
+        if st.session_state.createuser == 1:
             with st.form("Create a new account"):
                 new_username = st.text_input("User Name", key='username')
                 new_password = st.text_input(
@@ -178,11 +178,11 @@ def login_ui():
                         f'SELECT * FROM users WHERE username = "{new_username}"')
                     data = c.fetchall()
                     if (len(data) == 0):
-                        st.session_state.create = 2
+                        st.session_state.createuser = 2
                         add_userdata(new_username, make_hashes(new_password))
                         st.success('Account Created')
                     else:
-                        st.session_state.create = 3
+                        st.session_state.createuser = 3
                         st.warning('Username already exists')
 
 # loading the saved models
@@ -209,6 +209,7 @@ if selected == 'Home':
 
 if selected == 'View Stored Data':
     login_ui()
+    
 # Diabetes Prediction Page
 if (selected == 'Diabetes Prediction'):
     
@@ -245,18 +246,53 @@ if (selected == 'Diabetes Prediction'):
     
     # code for Prediction
     diab_diagnosis = ''
+    res = 0
     
     # creating a button for Prediction
     
+    if 'predict' not in st.session_state:
+        st.session_state.predict = False
+    
     if st.button('Diabetes Test Result'):
+        st.session_state.predict = True
+    
+    if st.session_state.predict:
         diab_prediction = diabetes_model.predict([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
-        
-        if (diab_prediction[0] == 1):
-          diab_diagnosis = 'The person is diabetic'
+        res = diab_prediction[0]
+        if (res == 1):
+            diab_diagnosis = 'The person is diabetic'
         else:
-          diab_diagnosis = 'The person is not diabetic'
+            diab_diagnosis = 'The person is not diabetic'
+        st.success(diab_diagnosis)
+    
+    if 'submit' not in st.session_state:
+        st.session_state.submit = False
         
-    st.success(diab_diagnosis)
+    if (st.session_state.submit == False):
+        if st.session_state.predict and st.button('Save', key='save'):
+            st.session_state.submit = True
+
+    if st.session_state.submit:
+        if 'login' not in st.session_state:
+            st.session_state.login = False
+        with st.form("Login"):
+            username = st.text_input("User Name", key='username')
+            password = st.text_input("Password", type='password', key='password')
+            login = st.form_submit_button("Login")
+            if login:
+                st.session_state.login = True
+            
+            if st.session_state.login:
+                logged = login_user(username, make_hashes(password))
+                if logged:
+                    if (res == 1):
+                        Outcome = 1
+                    else:
+                        Outcome = 0
+                    diabetes_ins(username, Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age, Outcome)
+                    st.success('Data Saved')
+                else:
+                    st.warning('Incorrect Username/Password')
 
     df_diabetes = pd.read_csv('./datasets/diabetes.csv')
     st.subheader('Data Information: ')
@@ -317,15 +353,49 @@ if (selected == 'Heart Disease Prediction'):
     
     # creating a button for Prediction
     
+    if 'predict' not in st.session_state:
+        st.session_state.predict = False
+    
     if st.button('Heart Disease Test Result'):
+        st.session_state.predict = True
+        
+    if st.session_state.predict:
         heart_prediction = heart_disease_model.predict([[int(age), int(sex), int(cp), int(trestbps), int(chol), int(fbs), int(restecg),int(thalach),int(exang),int(oldpeak),int(slope),int(ca),int(thal)]])                          
         
         if (heart_prediction[0] == 1):
-          heart_diagnosis = 'The person is having heart disease'
+            heart_diagnosis = 'The person is having heart disease'
         else:
-          heart_diagnosis = 'The person does not have any heart disease'
+            heart_diagnosis = 'The person does not have any heart disease'
+        st.success(heart_diagnosis)
         
-    st.success(heart_diagnosis)
+    if 'submit' not in st.session_state:
+        st.session_state.submit = False
+        
+    if (st.session_state.submit == False):
+        if st.session_state.predict and st.button('Save', key='save'):
+            st.session_state.submit = True
+        
+    if st.session_state.submit:
+        if 'login' not in st.session_state:
+            st.session_state.login = False
+        with st.form("Login"):
+            username = st.text_input("User Name", key='username')
+            password = st.text_input("Password", type='password', key='password')
+            loginbtn = st.form_submit_button("Login")
+            if loginbtn:
+                st.session_state.login = True
+            
+            if st.session_state.login:
+                logged = login_user(username, make_hashes(password))
+                if logged:
+                    if heart_prediction[0] == 1:
+                        Outcome = 1
+                    else:
+                        Outcome = 0
+                    heart_ins(username, age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal, Outcome)
+                    st.success('Data Saved')
+                else:
+                    st.warning('Incorrect Username/Password')
 
     df_heart = pd.read_csv('./datasets/heart.csv')
     st.subheader('Data Information: ')
@@ -333,8 +403,8 @@ if (selected == 'Heart Disease Prediction'):
     st.write(df_heart.describe())
     st.bar_chart(df_heart)
     st.write('### Model Accuracy - ',heart.accuracy)
-
-
+    
+    
 # Liver Disease Prediction Page
 if (selected == 'Liver Disease Prediction'):
     
@@ -380,7 +450,13 @@ if (selected == 'Liver Disease Prediction'):
     
     # creating a button for Prediction
     
+    if 'predict' not in st.session_state:
+        st.session_state.predict = False
+    
     if st.button('Liver Disease Test Result'):
+        st.session_state.predict = True
+        
+    if st.session_state.predict:
         liver_prediction = liver_disease_model.predict([[Age,Gender,Total_Bilirubin,Direct_Bilirubin,Alkaline_Phosphotase,Alamine_Aminotransferase,Aspartate_Aminotransferase,Total_Protiens,Albumin,Albumin_and_Globulin_Ratio]])                          
         
         if (liver_prediction[0] == 1):
@@ -388,7 +464,33 @@ if (selected == 'Liver Disease Prediction'):
         else:
           liver_diagnosis = 'The person does not have any liver disease'
         
-    st.success(liver_diagnosis)
+        st.success(liver_diagnosis)
+    
+    if 'submit' not in st.session_state:
+        st.session_state.submit = False
+        
+    if (st.session_state.submit == False):
+        if st.session_state.predict and st.button('Save', key='save'):
+            st.session_state.submit = True
+
+    if st.session_state.submit:
+        if 'login' not in st.session_state:
+            st.session_state.login = False
+        with st.form("Login"):
+            username = st.text_input("User Name", key='username')
+            password = st.text_input("Password", type='password', key='password')
+            loginbtn = st.form_submit_button("Login")
+            if loginbtn:
+                logged = login_user(username, make_hashes(password))
+                if logged:
+                    if liver_prediction[0] == 1:
+                        Outcome = 1
+                    else:
+                        Outcome = 2
+                    liver_ins(username, Age, Gender, Total_Bilirubin, Direct_Bilirubin, Alkaline_Phosphotase, Alamine_Aminotransferase, Aspartate_Aminotransferase, Total_Protiens, Albumin, Albumin_and_Globulin_Ratio, Outcome)
+                    st.success('Data Saved')
+                else:
+                    st.warning('Incorrect Username/Password')
 
     df_liver = pd.read_csv('./datasets/liver.csv')
     gender = {'Male': 1,'Female': 0}
