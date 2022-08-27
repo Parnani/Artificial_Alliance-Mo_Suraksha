@@ -20,5 +20,9 @@
         - replaced the NaN values in df_liver['Albumin_and_Globulin_Ratio'] column with 0.
         - implemented LogisticRegression() algorithm.
 
-
 - exported the .ipynb files into .py files.
+
+- implemented user database
+    - created a table for user details and entries for individual data and stored them to data.db
+    - implemented login system to website
+    - added an option to print the table
