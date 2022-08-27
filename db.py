@@ -61,7 +61,7 @@ def heart_ins(username, age, sex, cp, trestbps, chol, fbs, restecg, thalach, exa
 
 
 def heart_view(username):
-    c.execute('SELECT * FROM heart WHERE username = "?"', (username))
+    c.execute(f'SELECT * FROM heart WHERE username = "{username}"')
     data = c.fetchall()
     return data
 
@@ -73,7 +73,7 @@ def diabetes_ins(username, Pregnancies, Glucose, BloodPressure, SkinThickness, I
 
 
 def diabetes_view(username):
-    c.execute('SELECT * FROM diabetes WHERE username = "?"', (username))
+    c.execute(f'SELECT * FROM diabetes WHERE username = "{username}"')
     data = c.fetchall()
     return data
 
@@ -93,6 +93,12 @@ def login_ui():
             choice = st.radio("Select Dataset to Display", ("Liver", "Heart", "Diabetes"))
             if choice == "Liver":
                 data = liver_view(username)
+                st.write(data)
+            if choice == "Heart":
+                data = heart_view(username)
+                st.write(data)
+            if choice == "Diabetes":
+                data = diabetes_view(username)
                 st.write(data)
         else:
             st.warning('Incorrect Username/Password')
