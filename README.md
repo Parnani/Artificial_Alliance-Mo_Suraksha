@@ -1,4 +1,3 @@
-
 # Team - Artificial Alliance
 # Mo Suraksha
 
@@ -22,9 +21,15 @@
 
 - exported the .ipynb files into .py files.
 
-- implemented user database
-    - created a table for user details and entries for individual data and stored them to data.db
-    - implemented login system to website
-    - added an option to print the table
-    - added session-based sign up system
-    - upon login, users can now view all stored datas
+- multiple_disease_prediction.py -
+    - loaded the saved models using pickle.
+    - implemented user database
+        - created a table for user details and entries for individual data and stored them to data.db
+        - implemented login system to website
+        - added an option to print the table
+        - added session-based sign up system
+        - upon login, users can now view all stored datas 
+    - implemented database access page
+    - implemented sidebar containg Home, Diabetes Prediction, Heart Disease Prediction, Liver Disease Prediction, View Stored Data.
+    - implemented sliders for each of the features in all 3 diseases.
+    - added diseases' dataframes, description of the dataframe and a bar-chart visualization of the data.
